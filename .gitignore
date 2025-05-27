@@ -1,0 +1,73 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+## Ignore Visual Studio temporary files, build results, and
+## user-specific files
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+*.log
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Mono Auto Generated Files
+mono_crash.*
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# DotCover
+.idea/
+*.dotCover
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Core
+wwwroot/lib/
+node_modules/
+bower_components/
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+*.nuspec
+*.psmdcp
+
+# Microsoft Azure Web App publish settings
+PublishProfiles/
+
+# Others
+*.dbmdl
+*.bak
+*.sql
+*.pdb
+*.cache
+*.config
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+/Microsoft.REPR/.vs
+/.vs/Microsoft.REPR
