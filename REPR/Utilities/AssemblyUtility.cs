@@ -60,7 +60,8 @@ internal static class AssemblyUtility
         var targetAssemblies = GetTargetedAssemblies(includeAppDomainAssemblies).OrderBy(a => a.FullName);
         foreach (var executingAssembly in targetAssemblies)
         {
-            foreach (var type in executingAssembly.GetTypes())
+            var types = executingAssembly.GetTypes();
+            foreach (var type in types)
             {
                 Type currentType = type!;
                 if (currentType.FullName?.StartsWith(_reprAssemblyName, StringComparison.Ordinal) == true)
