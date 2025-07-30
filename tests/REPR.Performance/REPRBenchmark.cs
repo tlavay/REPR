@@ -26,6 +26,6 @@ public class REPRBenchmark
     public void AddREPR()
     {
         var services = new ServiceCollection();
-        services.AddREPR(_reprOptions);
+        services.AddREPR<Program>(_reprOptions);
     }
 }

@@ -7,12 +7,17 @@ namespace REPR.Utilities;
 
 internal static class REPRUtilities
 {
-    public static void AddREPRInternal(ref IServiceCollection services, in REPROptions reprOptions)
+    public static void AddREPRInternal<T>(ref IServiceCollection services, in REPROptions reprOptions)
     {
-        var targetExecutingAssembly = reprOptions.FilteredAssemblies is not null && reprOptions.FilteredAssemblies.Any();
-        if (reprOptions.IncludeAppDomainAssemblies && !targetExecutingAssembly)
+        var sourceAssembly = typeof(T).Assembly.GetName().Name;
+        if (string.IsNullOrEmpty(sourceAssembly))
         {
-            throw new REPRException("Including App Domain Assemblies is only supported with adding filtered assemblies.");
+            throw new REPRException("The source assembly provided was not valid.");
+        }
+
+        if (!reprOptions.FilteredAssemblies.Any(filteredAssembly => filteredAssembly == sourceAssembly))
+        {
+            reprOptions.FilteredAssemblies.Add(sourceAssembly);
         }
 
         var validTargetTypes = AssemblyUtility.GetTargetTypes(reprOptions.FilteredAssemblies, reprOptions.IncludeAppDomainAssemblies);

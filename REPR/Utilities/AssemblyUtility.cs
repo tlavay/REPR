@@ -47,30 +47,17 @@ internal static class AssemblyUtility
     // Other REPR assembly names
     private static readonly string _reprAssemblyName = typeof(REPR).Assembly.GetName().Name!;
 
-    public static List<Type> GetTargetTypes(IEnumerable<string>? filteredAssemblies, in bool includeAppDomainAssemblies)
+    public static List<Type> GetTargetTypes(List<string> filteredAssemblies, in bool includeAppDomainAssemblies)
     {
-        var filterTargetAssemblies = false;
-        if (filteredAssemblies is not null && filteredAssemblies.Any())
-        {
-            filteredAssemblies = filteredAssemblies.ToArray();
-            filterTargetAssemblies = true;
-        }
-
         var targetTypes = new List<Type>();
-        var targetAssemblies = GetTargetedAssemblies(includeAppDomainAssemblies).OrderBy(a => a.FullName);
+        var targetAssemblies = GetTargetedAssemblies(filteredAssemblies, includeAppDomainAssemblies);
         foreach (var executingAssembly in targetAssemblies)
         {
-            var types = executingAssembly.GetTypes();
+            var types = SafelyGetTypes(executingAssembly);
             foreach (var type in types)
             {
                 Type currentType = type!;
                 if (currentType.FullName?.StartsWith(_reprAssemblyName, StringComparison.Ordinal) == true)
-                {
-                    continue;
-                }
-
-                var isNotTargetAssembly = IsNotTargetAssembly(filteredAssemblies!, currentType.FullName);
-                if (filterTargetAssemblies && isNotTargetAssembly)
                 {
                     continue;
                 }
@@ -162,15 +149,40 @@ internal static class AssemblyUtility
         return _validHandlers.Any(_validHandlers => fullName.StartsWith(_validHandlers.Key, StringComparison.Ordinal));
     }
 
-    private static bool IsNotTargetAssembly(in IEnumerable<string> targetAssemblies, string? fullName) => !targetAssemblies.Any(targetAssembly => fullName?.StartsWith(targetAssembly, StringComparison.Ordinal) == true);
+    private static bool IsTargetAssembly(in IEnumerable<string> targetAssemblies, string? fullName) => targetAssemblies.Any(targetAssembly => fullName?.StartsWith(targetAssembly, StringComparison.Ordinal) == true);
 
-    private static Assembly[] GetTargetedAssemblies(in bool useAppDomainAssemblies)
+    private static Assembly[] GetTargetedAssemblies(List<string> filteredAssembilies, in bool useAppDomainAssemblies)
     {
-        if (useAppDomainAssemblies)
+        IEnumerable<Assembly>? scopedAssemblies = null;
+        if (!useAppDomainAssemblies)
         {
-            return AppDomain.CurrentDomain.GetAssemblies();
+            scopedAssemblies = AppDomain.CurrentDomain.GetAssemblies().Where(assembly => IsTargetAssembly(filteredAssembilies, assembly.FullName));
+        }
+        else
+        {
+            scopedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
         }
 
-        return [Assembly.GetExecutingAssembly()];
+        return scopedAssemblies.OrderBy(a => a.FullName).ToArray();
+    }
+
+    private static Type[] SafelyGetTypes(Assembly assembly)
+    {
+        try
+        {
+            return assembly.GetTypes();
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            foreach (var loaderEx in ex.LoaderExceptions)
+            {
+                if (loaderEx is not null)
+                {
+                    Console.WriteLine(loaderEx.Message);
+                }
+            }
+        }
+
+        return [];
     }
 }
