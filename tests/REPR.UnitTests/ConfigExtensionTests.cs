@@ -27,7 +27,7 @@ public class ConfigExtensionTests
         };
 
         // Act
-        services.AddREPR(reprOptions);
+        services.AddREPR<ConfigExtensionTests>(reprOptions);
         var serviceProvider = services.BuildServiceProvider();
 
         // Assert
@@ -43,7 +43,7 @@ public class ConfigExtensionTests
         var services = new ServiceCollection();
 
         // Act
-        var exception = Assert.Throws<REPRException>(() => services.AddREPR());
+        var exception = Assert.Throws<REPRException>(() => services.AddREPR<ConfigExtensionTests>());
 
         // Assert
         Assert.Equal(REPRConstants.NoResourcesAddedError, exception.Message);
@@ -57,41 +57,10 @@ public class ConfigExtensionTests
         var services = new ServiceCollection();
 
         // Act
-        var exception = Assert.Throws<REPRException>(() => services.AddREPR());
+        var exception = Assert.Throws<REPRException>(() => services.AddREPR<ConfigExtensionTests>());
 
         // Assert
         Assert.Equal(REPRConstants.NoResourcesAddedError, exception.Message);
-    }
-
-    [Fact]
-    public void AddREPR_WithInvalidOptionsIncludeAppDomainInAssembliesCannotBeTrue_ShouldThrowREPRException()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-
-        // Act
-        var exception = Assert.Throws<REPRException>(() => services.AddREPR(options => options.IncludeAppDomainAssemblies = true));
-
-        // Assert
-        Assert.Equal("Including App Domain Assemblies is only supported with adding filtered assemblies.", exception.Message);
-    }
-
-    [Fact]
-    public void AddREPR_WithInvalidOptionsFilteredAssembliesCantBeEmpty_ShouldThrowREPRException()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-        var reprOptions = new REPROptions
-        {
-            FilteredAssemblies = [],
-            IncludeAppDomainAssemblies = true,
-        };
-
-        // Act
-        var exception = Assert.Throws<REPRException>(() => services.AddREPR(reprOptions));
-
-        // Assert
-        Assert.Equal("Including App Domain Assemblies is only supported with adding filtered assemblies.", exception.Message);
     }
 
     private static async Task AssertTransientHandlers(IServiceProvider serviceProvider, IServiceCollection services)

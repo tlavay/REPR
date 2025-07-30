@@ -6,26 +6,37 @@ namespace REPR;
 
 public static class ConfigExtension
 {
-    public static void AddREPR(this IServiceCollection services)
+    /// <summary>
+    /// Adds REPR handlers to Service Collection.
+    /// </summary>
+    /// <typeparam name="T">A class where this assembly is called. Use program.cs where possible.</typeparam>
+    /// <param name="services">The service Collection.</param>
+    /// <exception cref="REPRException">Thrown if the provided source assembly is not valid.</exception>
+    public static void AddREPR<T>(this IServiceCollection services)
     {
-        var defaultREPROptions = new REPROptions
+        var reprOptions = new REPROptions()
         {
-            FilteredAssemblies = null,
-            StrictMode = true,
+            FilteredAssemblies = [],
         };
 
-        REPRUtilities.AddREPRInternal(ref services, defaultREPROptions);
+        REPRUtilities.AddREPRInternal<T>(ref services, reprOptions);
     }
 
-    public static void AddREPR(this IServiceCollection services, Action<REPROptions> reprOptions)
+    /// <summary>
+    /// Adds REPR handlers to Service Collection.
+    /// </summary>
+    /// <typeparam name="T">A class where this assembly is called. Use program.cs where possible.</typeparam>
+    /// <param name="services">The service Collection.</param>
+    /// <exception cref="REPRException">Thrown if the provided source assembly is not valid.</exception>
+    public static void AddREPR<T>(this IServiceCollection services, Action<REPROptions> reprOptions)
     {
-        var newOptions = new REPROptions();
+        var newOptions = new REPROptions() { FilteredAssemblies = [], };
         reprOptions(newOptions);
-        REPRUtilities.AddREPRInternal(ref services, newOptions);
+        REPRUtilities.AddREPRInternal<T>(ref services, newOptions);
     }
 
-    public static void AddREPR(this IServiceCollection services, REPROptions reprOptions)
+    public static void AddREPR<T>(this IServiceCollection services, REPROptions reprOptions)
     {
-        REPRUtilities.AddREPRInternal(ref services, reprOptions);
+        REPRUtilities.AddREPRInternal<T>(ref services, reprOptions);
     }
 }
