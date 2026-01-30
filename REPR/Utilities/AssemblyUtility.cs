@@ -42,14 +42,14 @@ internal static class AssemblyUtility
         [typeof(ITransientCommandQueryRequestHandler<,,>).FullName!] = ServiceLifetime.Transient,
         [typeof(ITransientListRequestHandler<>).FullName!] = ServiceLifetime.Transient,
         [typeof(ITransientNotificationHandler<>).FullName!] = ServiceLifetime.Transient,
-    }.OrderBy(kvp => kvp.Key).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+    }.OrderBy(static kvp => kvp.Key).ToDictionary(static kvp => kvp.Key, static kvp => kvp.Value);
 
     // Other REPR assembly names
     private static readonly string _reprAssemblyName = typeof(REPR).Assembly.GetName().Name!;
 
     public static List<Type> GetTargetTypes(List<string> filteredAssemblies, in bool includeAppDomainAssemblies)
     {
-        var targetTypes = new List<Type>();
+        List<Type> targetTypes = [];
         var targetAssemblies = GetTargetedAssemblies(filteredAssemblies, includeAppDomainAssemblies);
         foreach (var executingAssembly in targetAssemblies)
         {
@@ -87,7 +87,7 @@ internal static class AssemblyUtility
             return false;
         }
 
-        var containsHandlerInterface = interfaces.Any(assemblyType => assemblyType is not null && InterfaceIsRequestHandler(assemblyType.FullName));
+        var containsHandlerInterface = interfaces.Any(static iface => iface is not null && InterfaceIsRequestHandler(iface.FullName));
         if (!containsHandlerInterface)
         {
             return false;
@@ -146,14 +146,14 @@ internal static class AssemblyUtility
             throw new REPRException($"Internal REPR exception. The type did not have a name. This exception should never happen. Please report this to the REPR team.");
         }
 
-        return _validHandlers.Any(_validHandlers => fullName.StartsWith(_validHandlers.Key, StringComparison.Ordinal));
+        return _validHandlers.Any(validHandler => fullName.StartsWith(validHandler.Key, StringComparison.Ordinal));
     }
 
     private static bool IsTargetAssembly(in IEnumerable<string> targetAssemblies, string? fullName) => targetAssemblies.Any(targetAssembly => fullName?.StartsWith(targetAssembly, StringComparison.Ordinal) == true);
 
     private static Assembly[] GetTargetedAssemblies(List<string> filteredAssembilies, in bool useAppDomainAssemblies)
     {
-        IEnumerable<Assembly>? scopedAssemblies = null;
+        IEnumerable<Assembly>? scopedAssemblies;
         if (!useAppDomainAssemblies)
         {
             scopedAssemblies = AppDomain.CurrentDomain.GetAssemblies().Where(assembly => IsTargetAssembly(filteredAssembilies, assembly.FullName));
@@ -163,7 +163,7 @@ internal static class AssemblyUtility
             scopedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
         }
 
-        return scopedAssemblies.OrderBy(a => a.FullName).ToArray();
+        return scopedAssemblies.OrderBy(static a => a.FullName).ToArray();
     }
 
     private static Type[] SafelyGetTypes(Assembly assembly)

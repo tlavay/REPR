@@ -14,7 +14,7 @@ internal sealed class REPR : IREPR
     public async Task<IEnumerable<TResponse>> ExecuteJob<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
     {
         var jobs = _serviceProvider.GetServices<IJobHandler<TRequest, TResponse>>();
-        if (jobs == null || !jobs.Any())
+        if (jobs is null || !jobs.Any())
         {
             throw new InvalidOperationException($"No IJobHandlers are registered for request type '{typeof(TRequest).FullName}' and response type '{typeof(TResponse).FullName}'. \r\n" +
                 $"Make sure you us AddREPR() in startup and the handler is in the executable or in app domain. See README.md");
@@ -27,20 +27,20 @@ internal sealed class REPR : IREPR
     public async Task Send<TRequest>(TRequest request, CancellationToken cancellationToken)
     {
         var subscribers = _serviceProvider.GetServices<INotificationHandler<TRequest>>();
-        if (subscribers == null || !subscribers.Any())
+        if (subscribers is null || !subscribers.Any())
         {
             throw new InvalidOperationException($"No INotificationHandler are registered for request type '{typeof(TRequest).FullName}'. \r\n" +
                 $"Make sure you us AddREPR() in startup and the handler is in the executable or in app domain. See README.md");
         }
 
-        var subscriberTasks = subscribers.Select(job => job.Send(request, cancellationToken));
+        var subscriberTasks = subscribers.Select(subscriber => subscriber.Send(request, cancellationToken));
         await Task.WhenAll(subscriberTasks);
     }
 
     public async Task<TResponse> Handle<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
     {
         var handler = _serviceProvider.GetService<IRequestHandler<TRequest, TResponse>>();
-        if (handler == null)
+        if (handler is null)
         {
             throw new InvalidOperationException($"No IRequestHandler are registered for request type '{typeof(TRequest).FullName}' and response type '{typeof(TResponse).FullName}'. \r\n" +
                 $"Make sure you us AddREPR() in startup and the handler is in the executable or in app domain. See README.md");
@@ -52,7 +52,7 @@ internal sealed class REPR : IREPR
     public async Task<TResponse> Handle<TCommand, TQuery, TResponse>(TCommand command, TQuery query, CancellationToken cancellationToken)
     {
         var handler = _serviceProvider.GetService<ICommandQueryRequestHandler<TCommand, TQuery, TResponse>>();
-        if (handler == null)
+        if (handler is null)
         {
             throw new InvalidOperationException($"No IRequestHandler are registered for command type '{typeof(TCommand).FullName}', query type '{typeof(TQuery).FullName}' and response type '{typeof(TResponse).FullName}'. \r\n" +
                 $"Make sure you us AddREPR() in startup and the handler is in the executable or in app domain. See README.md");
@@ -64,7 +64,7 @@ internal sealed class REPR : IREPR
     public async Task<IEnumerable<TResponse>> Handle<TResponse>(CancellationToken cancellationToken)
     {
         var handler = _serviceProvider.GetService<IListRequestHandler<TResponse>>();
-        if (handler == null)
+        if (handler is null)
         {
             throw new InvalidOperationException($"No IListRequestHandlers are registered for response type '{typeof(TResponse).FullName}'. \r\n" +
                 $"Make sure you us AddREPR() in startup and the handler is in the executable or in app domain. See README.md");
