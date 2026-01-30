@@ -63,6 +63,25 @@ public class ConfigExtensionTests
         Assert.Equal(REPRConstants.NoResourcesAddedError, exception.Message);
     }
 
+    [Fact]
+    public void AddREPR_WithUseSourceGenerationButNoGeneratedCode_ShouldThrowREPRException()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        var reprOptions = new REPROptions
+        {
+            FilteredAssemblies = [],
+            UseSourceGeneration = true,
+        };
+
+        // Act
+        var exception = Assert.Throws<REPRException>(() => services.AddREPR<ConfigExtensionTests>(reprOptions));
+
+        // Assert
+        Assert.Contains("Source generation is enabled but the generated registration class", exception.Message);
+        Assert.Contains("REPR.REPRRegistration", exception.Message);
+    }
+
     private static async Task AssertTransientHandlers(IServiceProvider serviceProvider, IServiceCollection services)
     {
         AssertHandler<IRequestHandler<TransientHandlerRequest, TransientHandlerResponse>, TransientHandler>(serviceProvider, services, ServiceLifetime.Transient);

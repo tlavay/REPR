@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
 	<PropertyGroup>
 		  <PackageId>REPR</PackageId>
-		  <Version>8.1.0</Version>
+		  <Version>10.0.0</Version>
 			<Company>LaVayApplications</Company>
 		  <Authors>Tyler La Vay</Authors>
 		  <Description>
@@ -25,12 +25,21 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 	<ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.7" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.2" />
   </ItemGroup>
 	<ItemGroup>
 		<None Include="README.md" Pack="true" PackagePath="" />
 	</ItemGroup>
 
+	<!-- Include the source generator in the package as an analyzer -->
+	<ItemGroup>
+		<ProjectReference Include="..\REPR.SourceGeneration\REPR.SourceGeneration.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+	</ItemGroup>
+	
+	<!-- Pack the source generator DLL into the analyzers folder -->
+	<ItemGroup>
+		<None Include="..\REPR.SourceGeneration\bin\$(Configuration)\netstandard2.0\REPR.G.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+	</ItemGroup>
 
 	<ItemGroup>
     <InternalsVisibleTo Include="REPR.UnitTests" />
