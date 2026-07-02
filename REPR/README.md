@@ -10,6 +10,7 @@ REPR optimizes dependency injection life cycles by supporting Transient, Scoped,
   - [Initialization](#initialization)
     - [Add to service collection](#add-to-service-collection)
     - [REPR Options](#repr-options)
+    - [Verbose Logging](#verbose-logging)
     - [Source Generation](#source-generation)
   - [REPR Handlers](#repr-handlers)
     - [Handlers](#handlers)
@@ -51,6 +52,8 @@ public sealed record REPROptions
     public IEnumerable<string>? FilteredAssemblies { get; set; }
     public bool StrictMode { get; set; }
     public bool UseSourceGeneration { get; set; }
+    public ILogger? Logger { get; set; }
+    public bool Verbose { get; set; }
 }
 ```
 
@@ -58,6 +61,28 @@ public sealed record REPROptions
 - FilteredAssemblies: limits the scope of assemblies during search and startup. This is highly recommended for large applications.
 - StrictMode: optional and primarily stylistic. Setting this to true will require the handler to be **internal** and **sealed**. This is a runtime error, so be careful. One day I would like to add an SCA to this repo.
 - UseSourceGeneration: enables compile-time source generation for handler registration, eliminating runtime reflection. See [Source Generation](#source-generation) for details.
+- Logger: optional `ILogger` used by REPR. When set together with `Verbose`, REPR logs the resolved handler type. See [Verbose Logging](#verbose-logging) for details.
+- Verbose: when true and `Logger` is set, REPR logs the full type name of each resolved handler, job, and subscriber on dispatch.
+
+#### Verbose Logging
+
+Provide an `ILogger` and set `Verbose` to true to have REPR log the full type name of every handler, job, and notification subscriber it resolves at dispatch time. Both options must be set; if either is missing, no logging occurs.
+
+```cs
+services.AddREPR<Program>(options =>
+{
+    options.Logger = loggerFactory.CreateLogger("REPR");
+    options.Verbose = true;
+});
+```
+
+Each dispatch logs an information-level entry such as:
+
+```
+REPR resolved type: Test.REPR.Library.TransientHandler
+```
+
+For `ExecuteJob` and `Send`, every resolved job or subscriber is logged individually.
 
 #### Source Generation
 

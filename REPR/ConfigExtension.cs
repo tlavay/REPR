@@ -56,7 +56,7 @@ public static class ConfigExtension
     {
         if (reprOptions.UseSourceGeneration)
         {
-            AddREPRFromSourceGeneration<T>(services);
+            AddREPRFromSourceGeneration<T>(services, reprOptions);
         }
         else
         {
@@ -64,7 +64,7 @@ public static class ConfigExtension
         }
     }
 
-    private static void AddREPRFromSourceGeneration<T>(IServiceCollection services)
+    private static void AddREPRFromSourceGeneration<T>(IServiceCollection services, REPROptions reprOptions)
     {
         var callingAssembly = typeof(T).Assembly;
         var registrationType = callingAssembly.GetType(GeneratedRegistrationTypeName);
@@ -89,5 +89,7 @@ public static class ConfigExtension
 
         // Invoke the generated registration method
         registrationMethod.Invoke(null, new object[] { services });
+
+        services.AddSingleton(reprOptions);
     }
 }

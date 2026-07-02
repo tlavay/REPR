@@ -1,14 +1,18 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using REPR.Handlers;
+using REPR.Models;
 
 namespace REPR;
 
 internal sealed class REPR : IREPR
 {
     private readonly IServiceProvider _serviceProvider;
-    public REPR(IServiceProvider serviceProvider)
+    private readonly REPROptions _options;
+    public REPR(IServiceProvider serviceProvider, REPROptions options)
     {
         _serviceProvider = serviceProvider;
+        _options = options;
     }
 
     public async Task<IEnumerable<TResponse>> ExecuteJob<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
@@ -20,7 +24,11 @@ internal sealed class REPR : IREPR
                 $"Make sure you us AddREPR() in startup and the handler is in the executable or in app domain. See README.md");
         }
 
-        var jobTasks = jobs.Select(job => job.Execute(request, cancellationToken));
+        var jobTasks = jobs.Select(job =>
+        {
+            LogResolvedType(job);
+            return job.Execute(request, cancellationToken);
+        });
         return await Task.WhenAll(jobTasks);
     }
 
@@ -33,7 +41,11 @@ internal sealed class REPR : IREPR
                 $"Make sure you us AddREPR() in startup and the handler is in the executable or in app domain. See README.md");
         }
 
-        var subscriberTasks = subscribers.Select(subscriber => subscriber.Send(request, cancellationToken));
+        var subscriberTasks = subscribers.Select(subscriber =>
+        {
+            LogResolvedType(subscriber);
+            return subscriber.Send(request, cancellationToken);
+        });
         await Task.WhenAll(subscriberTasks);
     }
 
@@ -46,6 +58,7 @@ internal sealed class REPR : IREPR
                 $"Make sure you us AddREPR() in startup and the handler is in the executable or in app domain. See README.md");
         }
 
+        LogResolvedType(handler);
         return await handler.Handle(request, cancellationToken);
     }
 
@@ -58,6 +71,7 @@ internal sealed class REPR : IREPR
                 $"Make sure you us AddREPR() in startup and the handler is in the executable or in app domain. See README.md");
         }
 
+        LogResolvedType(handler);
         return await handler.Handle(command, query, cancellationToken);
     }
 
@@ -70,6 +84,15 @@ internal sealed class REPR : IREPR
                 $"Make sure you us AddREPR() in startup and the handler is in the executable or in app domain. See README.md");
         }
 
+        LogResolvedType(handler);
         return await handler.Handle(cancellationToken);
+    }
+
+    private void LogResolvedType(object resolved)
+    {
+        if (_options.Verbose && _options.Logger is not null)
+        {
+            _options.Logger.LogInformation("REPR resolved type: {ResolvedType}", resolved.GetType().FullName);
+        }
     }
 }

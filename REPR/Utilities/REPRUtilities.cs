@@ -32,6 +32,7 @@ internal static class REPRUtilities
             throw new REPRException(REPRConstants.NoResourcesAddedError);
         }
 
+        services.AddSingleton(reprOptions);
         services.AddTransient<IREPR, REPR>();
     }
 }
